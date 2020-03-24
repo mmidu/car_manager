@@ -1,0 +1,21 @@
+version: '3.5'
+
+services:
+  apache:
+    build:
+      context: docker/apache/.
+    container_name: car_manager_apache
+    ports:
+      - 8080:80
+    volumes:
+      - ./src:/var/www/localhost/htdocs
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: 'car_manager'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - 3307:3306
+    volumes:
+      - ./data:/var/lib/mysql
+    container_name: car_manager_mysql
