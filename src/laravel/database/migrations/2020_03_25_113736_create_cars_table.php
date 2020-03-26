@@ -22,6 +22,8 @@ class CreateCarsTable extends Migration
             $table->date('year')->nullable();
             $table->string('engine_displacement')->nullable();
             $table->string('hp')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent();
         });
         Schema::table('cars', function(Blueprint $table){
         	$table->foreign('owner_id')->references('id')->on('users');

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTransitionTable extends Migration
+class CreateTransitionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,14 @@ class CreateTransitionTable extends Migration
      */
     public function up()
     {
-        Schema::create('transition', function (Blueprint $table) {
+        Schema::create('transitions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('old_owner_id');
             $table->unsignedBigInteger('new_owner_id');
             $table->unsignedBigInteger('car_id');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
         });
-        Schema::table('transition', function(Blueprint $table){
+        Schema::table('transitions', function(Blueprint $table){
             $table->foreign('old_owner_id')->references('id')->on('users');
             $table->foreign('new_owner_id')->references('id')->on('users');
             $table->foreign('car_id')->references('id')->on('cars');
@@ -35,6 +35,6 @@ class CreateTransitionTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('transition');
+        Schema::dropIfExists('transitions');
     }
 }
