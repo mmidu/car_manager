@@ -1,6 +1,6 @@
 FROM alpine:3.11
 
-RUN apk add --no-cache --virtual python3-dev nano && \
+RUN apk add --no-cache --virtual python3-dev nano curl && \
 	apk add --no-cache --update python3 && \
 	pip3 install --upgrade pip && \
 	mkdir /app

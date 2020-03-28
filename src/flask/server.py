@@ -1,11 +1,18 @@
 from hashlib import sha256
 import json
 import time
-import redis
 import uuid
 from flask import Flask, request
 import requests
+from queries import sorted_chain, sorted_unconfirmed
+from migrations import transactions, unconfirmed_transactions
+from elasticsearch import Elasticsearch
 
+es = Elasticsearch('http://cm_elastic')
+
+app = Flask(__name__)
+
+milli_time = lambda: int(round(time.time() * 1000))
 
 class Block: 
 	def __init__(self, index, transaction, timestamp, previous_hash, nonce=0):
@@ -19,13 +26,26 @@ class Block:
 		block_string = json.dumps(self.__dict__, sort_keys=True)
 		return sha256(block_string.encode()).hexdigest()
 
+	@property
+	def json(self):
+		return self.__dict__
+
 
 class Blockchain:
-	def __init__(self, difficulty=2, auto_mine=True):
+	def __init__(self, name='ledger',difficulty=2, auto_mine=True):
 		self.difficulty = difficulty
 		self.auto_mine = auto_mine
+		self.name = name
+		self.init_elastic()
 		self.create_genesis_block()
-		#r.set('chain', '[]') # EMPTIES THE BLOCKCHAIN AT STARTUP
+
+	def init_elastic(self):
+		es.indices.delete(index='unconfirmed_{}'.format(self.name), ignore=[400, 404])
+		es.indices.create(index='unconfirmed_{}'.format(self.name))
+		es.indices.put_mapping(index='unconfirmed_{}'.format(self.name), body=unconfirmed_transactions)
+		es.indices.delete(index=self.name, ignore=[400, 404])
+		es.indices.create(index=self.name)
+		es.indices.put_mapping(index=self.name, body=transactions)
 
 	def create_genesis_block(self):
 		if not self.chain:
@@ -35,26 +55,20 @@ class Blockchain:
 
 	@property
 	def last_block(self):
-		lb = self.chain[-1]
+		lb = self.chain[0]
 		block = Block(lb['index'], lb['transaction'], lb['timestamp'], lb['previous_hash'], lb['nonce'])
 		block.hash = lb['hash']
 		return block
 
 	@property
 	def unconfirmed_transactions(self):
-		if r.get('unconfirmed_transactions') is None:
-			unconfirmed_transactions = '[]'
-		else:
-			unconfirmed_transactions = r.get('unconfirmed_transactions')
-		return json.loads(unconfirmed_transactions)
+		data = es.search(index='unconfirmed_{}'.format(self.name), body=sorted_unconfirmed)['hits']['hits']
+		return list(map(lambda x: x['_source'], data))
 
 	@property
 	def chain(self):
-		if r.get('chain') is None:
-			chain = '[]'
-		else:
-			chain = r.get('chain')
-		return json.loads(chain)
+		data = es.search(index=self.name, body=sorted_chain)['hits']['hits']
+		return list(map(lambda x: x['_source'], data))
 
 	def add_block(self, block, proof):
 		previous_hash = self.last_block.hash
@@ -80,14 +94,10 @@ class Blockchain:
 		return computed_hash
 
 	def add_new_transaction(self, transaction):
-		unconfirmed_transactions = self.unconfirmed_transactions
-		unconfirmed_transactions.append(transaction)
-		r.set('unconfirmed_transactions', json.dumps(unconfirmed_transactions))
+		es.index(index='unconfirmed_{}'.format(self.name), doc_type='_create', id=transaction["uuid"], body=json.dumps(transaction))
 
 	def add_to_chain(self, block):
-		chain = self.chain
-		chain.append(block.__dict__)
-		r.set('chain', json.dumps(chain))
+		es.index(index=self.name, doc_type='_create', id=block.hash, body=block.json)
 
 	def is_valid_proof(self, block, block_hash):
 		return (block_hash.startswith('0' * self.difficulty) and
@@ -116,29 +126,29 @@ class Blockchain:
 
 		last_block = self.last_block
 
-		unconfirmed_transactions = self.unconfirmed_transactions
-
 		new_block = Block(index=last_block.index + 1,
-						  transaction=unconfirmed_transactions.pop(0),
-						  timestamp=time.time(),
+						  transaction=self.unconfirmed_transactions[0],
+						  timestamp=milli_time(),
 						  previous_hash=last_block.hash)
 
-		r.set('unconfirmed_transactions', json.dumps(unconfirmed_transactions))
-
+		es.delete(index='unconfirmed_{}'.format(self.name), id=self.unconfirmed_transactions[0]['uuid'])
 		proof = self.proof_of_work(new_block)
 
 		self.add_block(new_block, proof)
 
 		return last_block.index + 1
-	
 
 
-app = Flask(__name__)
+blockchain = Blockchain(auto_mine=True, name='transactions')
 
-r = redis.Redis(host='cm_redis', port=6379, db=0)
 
-blockchain = Blockchain(auto_mine=True)
-
+def _finditem(obj, key):
+    if key in obj: return obj[key]
+    for k, v in obj.items():
+        if isinstance(v,dict):
+            item = _finditem(v, key)
+            if item is not None:
+                return item
 
 
 @app.route('/', methods=['GET'])
@@ -149,14 +159,25 @@ def home():
 def new_transaction():
 	tx_data = request.get_json()
 
-	required_fields = ["old_owner", "new_owner", "car"]
+	required_fields = [
+		"license_plate",
+		"manufacturer",
+		"year",
+		"engine_displacement",
+		"horse_power",
+		"fiscal_code",
+		"first_name",
+		"last_name",
+		"birth_date",
+		"address"
+	]
 
 	for field in required_fields:
-		if not tx_data.get(field):
+		if not _finditem(tx_data, field):
 			return "Invalid transaction data", 404
 
-	tx_data["timestamp"] = time.time()
-	tx_data["uuid"] = uuid.uuid1()
+	tx_data["timestamp"] = milli_time()
+	tx_data["uuid"] = str(uuid.uuid1())
 
 	blockchain.add_new_transaction(tx_data)
 
@@ -165,18 +186,16 @@ def new_transaction():
 
 @app.route('/chain', methods=['GET'])
 def get_chain():
-	chain_data = []
-	for block in blockchain.chain:
-		chain_data.append(block)
+	chain_data = blockchain.chain
 	return json.dumps({
 		"length": len(chain_data),
 		"chain": chain_data
 	})
 
-
 @app.route('/mine', methods=['GET'])
 def mine_unconfirmed_transactions():
 	result = blockchain.mine()
+	return str(result)
 	if not result:
 		return "No transactions to mine."
 	return "Block #{} is mined.".format(result)

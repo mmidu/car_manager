@@ -1,7 +1,51 @@
 version: '3.5'
 
 services:
-  
+
+  flask:
+    build:
+      context: ./docker/flask
+    depends_on: 
+      - elastic
+    container_name: cm_flask
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - ./src/flask:/app
+    networks:
+      backend:
+        aliases:
+          - cm_flask
+
+  elastic:
+    build:
+      context: ./docker/elastic
+      args:
+        ELASTIC_VERSION: 7.5.0
+    container_name: cm_elastic
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./data/elastic/:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    restart: always
+    networks:
+      backend:
+        aliases:
+          - cm_elastic
+
   # apache:
   #   build:
   #     context: docker/apache/.
@@ -33,60 +77,6 @@ services:
   #       aliases:
   #         - cm_mysql
 
-  flask:
-    build:
-      context: ./docker/flask
-    container_name: cm_flask
-    restart: always
-    ports:
-      - 8000:8000
-    volumes:
-      - ./src/flask:/app
-    networks:
-      backend:
-        aliases:
-          - cm_flask
-
-  # redis:
-  #   image: redis:5.0
-  #   container_name: cm_redis
-  #   restart: always
-  #   ports:
-  #     - 6379:6379
-  #   volumes:
-  #     - ./data/redis:/data
-  #   networks:
-  #     backend:
-  #       aliases:
-  #         - cm_redis
-  
-  elastic:
-    build:
-      context: ./docker/elastic
-      args:
-        ELASTIC_VERSION: 7.5.0
-    container_name: cm_elastic
-    environment:
-      - xpack.security.enabled=false
-      - discovery.type=single-node
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    cap_add:
-      - IPC_LOCK
-    volumes:
-      - ./data/elastic/:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-    networks:
-      backend:
-        aliases:
-          - cm_elastic
-          
 networks:
   backend:
     name: cm_network

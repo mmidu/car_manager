@@ -108,6 +108,36 @@ POST /transactions/_create/hash // POST /transactions/_create/009a9e80dcc40f55c6
 
 GET /transactions/_search
 
+// GET LAST TRANSACTION WITH PLATE X
+
+{
+	"query": {
+		"bool": {
+			"must": [
+				{
+					"nested" : {
+						"path" : "transaction.car",
+						"query" : {
+							"bool" : {
+								"must" : [
+									{ "match" : {"transaction.car.license_plate" : "AA111AA"} }
+								]
+							}
+						}
+					}
+				}
+			]
+		}
+	},
+	"sort" : {
+		"index": {"order": "desc"}
+	},
+	"size" : 1			    
+}
+
+
+// GET ALL TRANSACTIONS WITH PLATE X AND FISCAL CODE Y
+
 {
 	"query": {
 		"bool": {
