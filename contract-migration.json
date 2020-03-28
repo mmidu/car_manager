@@ -1,0 +1,142 @@
+_____MAPPINGS
+
+PUT /transactions/_mapping
+
+{
+	"properties": {
+		"index": {"type": "integer"},
+		"transaction": {
+			"type": "nested",
+			"properties": {
+				"car": {
+					"type": "nested",
+					"properties": {
+						"license_plate": {"type": "text"},
+						"model": {"type": "text"},
+						"manufacturer": {"type": "text"},
+						"year": {"type": "date"},
+						"engine_displacement": {"type": "integer"},
+						"horse_power": {"type": "integer"}
+					}
+				},
+				"owner": {
+					"type": "nested",
+					"properties": {
+						"fiscal_code": {"type": "text"},
+						"first_name": {"type": "text"},
+						"last_name": {"type": "text"},
+						"birth_date": {"type": "date"},
+						"address": {"type": "text"}
+					}
+				}
+			}			
+		},
+		"timestamp": {"type": "date"},
+		"previous_hash": {"type": "text"},
+		"nonce": {"type": "integer"},
+		"hash": {"type": "text"}
+	}
+}
+
+PUT /users/_mapping
+
+{
+	"properties": {
+		"fiscal_code": {"type": "text"},
+		"password": {"type": "text"},
+		"data": {
+			"type": "nested",
+			"properties": {
+				"first_name": {"type": "text"},
+				"last_name": {"type": "text"},
+				"birth_date": {"type": "date"},
+				"address": {"type": "text"}
+			}
+		}
+	}
+}
+
+GET /users/_search //GET IF USER EXISTS
+
+{
+	"query" : {
+		"bool" : {
+			"must" : [
+				{ "match" : {"fiscal_code" : "NTNTPC70A01F704K"} },
+				{ "match" : {"password" : "antani"} }
+			]
+		}
+	}
+}
+
+POST /users/_doc/fiscal_code // POST /users/_doc/NTNTPC70A01F704K
+
+{
+	"fiscal_code": "NTNTPC70A01F704K",
+	"password": "antani"
+}
+
+
+
+POST /transactions/_create/hash // POST /transactions/_create/009a9e80dcc40f55c643d685bc8197d699941a1ac8f03a3d2b8e4dbd2c8247ba
+
+{
+	"index": 1, 
+	"transaction": {
+		"car": {
+			"engine_displacement": 1200,
+			"horse_power": 96,
+			"license_plate": "AA111AA",
+			"manufacturer": "FIAT",
+			"model": "PANDA",
+			"year": "1970-01-01"
+		},
+		"owner": {
+			"address": "via Antani 30",
+			"birth_date": "1970-01-01",
+			"first_name": "Antani",
+			"fiscal_code": "NTNTPC70A01F704K",
+			"last_name": "Tapioca"
+		}
+	}, 
+	"timestamp": 1585309572.4655662, 
+	"previous_hash": "5a02e737fbf53c4d585e642b9ea50ef9f49394dbbed6de15fa08d3dcb6c33528",
+	"nonce": 157, 
+	"hash": "009a9e80dcc40f55c643d685bc8197d699941a1ac8f03a3d2b8e4dbd2c8247ba"
+}
+
+
+GET /transactions/_search
+
+{
+	"query": {
+		"bool": {
+			"must": [
+				{
+					"nested" : {
+						"path" : "transaction.car",
+						"query" : {
+							"bool" : {
+								"must" : [
+									{ "match" : {"transaction.car.license_plate" : "AA111AA"} }
+								]
+							}
+						}
+					}
+				},
+				{
+					"nested" : {
+						"path" : "transaction.owner",
+						"query" : {
+							"bool" : {
+								"must" : [
+									{ "match" : {"transaction.owner.fiscal_code" : "NTNTPC70A01F704K"} }
+								]
+							}
+						}
+					}
+				}
+			]
+		}
+	}
+}

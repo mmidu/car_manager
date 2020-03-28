@@ -18,13 +18,12 @@
 
                                 <div class="col-md-6">
                                     <input id="plate" type="text" class="form-control upper @error('plate') is-invalid @enderror" name="plate" value="{{ old('plate') }}" required autocomplete="plate" autofocus>
-
-                                    @error('plate')
-                                        <div class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </div>
-                                    @enderror
                                 </div>
+                                @error('error')
+                                    <div class="invalid-feedback" role="alert">
+                                         <strong>{{ $message }}</strong>
+                                    </div>
+                                @enderror
                             </div>
                         </div>
 
