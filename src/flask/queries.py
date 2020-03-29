@@ -5,9 +5,3 @@ sorted_chain = {
 		"index": {"order": "desc"}
 	}		    
 }
-
-sorted_unconfirmed = {
-	"sort" : {
-		"timestamp": {"order": "asc"}
-	}		    
-}

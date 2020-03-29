@@ -1,78 +1,39 @@
 import uuid
 from flask import Flask, request, jsonify
-from ledger import Blockchain, milli_time
+from ledger import Ledger, milli_time
+from contract import validate
 
 app = Flask(__name__)
 
-blockchain = Blockchain(name='transactions')
+ledger = Ledger(name='transactions')
 
 
 @app.route('/', methods=['GET'])
 def home():
-	return "v1.3", 201
+	return "v1.0", 201
+
 
 @app.route('/init', methods=['PUT'])
 def init_ledger():
-	blockchain.init()
+	ledger.init()
 	return 'ok', 201
 
-@app.route('/new_transaction', methods=['POST'])
-def new_transaction():
+
+@app.route('/add_transaction', methods=['POST'])
+def add_transaction():
 	request_data = request.get_json()
 
-	required_fields = {
-		"car": [
-			"license_plate",
-			"manufacturer",
-			"year",
-			"engine_displacement",
-			"horse_power",
-		],
-		"owner": [
-			"fiscal_code",
-			"first_name",
-			"last_name",
-			"birth_date",
-			"address",
-		]
-	}
-	
-	for group in required_fields:
-		if request_data.get(group) is None:
-			return "Invalid request data. {} field group required.".format(group), 404
-		for field in required_fields[group]:
-			if request_data.get(group).get(field) is None:
-				return "Invalid request data. {}.{} field required.".format(group, field), 404
+	status, message = validate(request_data)
+	if not status:
+		return message, 404
 
-
-	request_data["timestamp"] = milli_time()
-	request_data["uuid"] = str(uuid.uuid1())
-
-	blockchain.add_new_transaction(request_data)
-
-	return "Success", 201
+	return ledger.add_direct(request_data)
 
 
 @app.route('/chain', methods=['GET'])
 def get_chain():
-	chain_data = blockchain.chain
+	chain_data = ledger.chain
 	return jsonify({
 		"_size": len(chain_data),
 		"chain": chain_data
-	})
-
-@app.route('/mine', methods=['GET'])
-def mine_unconfirmed_transactions():
-	result = blockchain.mine()
-	if not result:
-		return "No transactions to mine."
-	return "Transaction #{} is mined.".format(result)
-
-
-@app.route('/unconfirmed_transactions')
-def get_unconfirmed_transactions():
-	ut = blockchain.unconfirmed_transactions
-	return jsonify({
-		"_size": len(ut),
-		"unconfirmed_transactions": ut
 	})
