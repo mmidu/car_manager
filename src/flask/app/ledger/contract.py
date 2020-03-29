@@ -15,7 +15,7 @@ required_fields = {
 	]
 }
 
-def validate(input):
+def validate_contract(input):
 	for group in required_fields:
 		if input.get(group) is None:
 			return False, "Invalid request data. {} field group required.".format(group)

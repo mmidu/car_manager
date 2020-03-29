@@ -144,4 +144,9 @@ return [
 
     ],
 
+    'ledger' => [
+        'host' => env('LEDGER_HOST', 'cm_flask'),
+        'port' => env('LEDGER_PORT', '8000')
+    ]
+
 ];

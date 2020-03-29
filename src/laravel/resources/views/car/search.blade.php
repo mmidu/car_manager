@@ -14,10 +14,10 @@
                         <div class="row">
 
                             <div>
-                                <label for="plate" class="col-md-4 col-form-label text-md-right">{{ __('Plate') }}</label>
+                                <label for="license_plate" class="col-md-4 col-form-label text-md-right">{{ __('Plate') }}</label>
 
                                 <div class="col-md-6">
-                                    <input id="plate" type="text" class="form-control upper @error('plate') is-invalid @enderror" name="plate" value="{{ old('plate') }}" required autocomplete="plate" autofocus>
+                                    <input id="license_plate" type="text" class="form-control upper @error('license_plate') is-invalid @enderror" name="license_plate" value="{{ old('license_plate') }}" required autocomplete="license_plate" autofocus>
                                 </div>
                                 @error('error')
                                     <div class="invalid-feedback" role="alert">

@@ -15,9 +15,13 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('email')->unique();
+            $table->string('fiscal_code')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->timestamp('birth_date')->nullable();
+            $table->string('address')->nullable();
             $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
@@ -25,11 +29,11 @@ class CreateUsersTable extends Migration
 
         DB::table('users')->insert([
             [
-                'email' => 'admin',
+                'fiscal_code' => 'A',
                 'password' => Hash::make('admin'),
             ],
             [
-                'email' => 'admin2',
+                'fiscal_code' => 'B',
                 'password' => Hash::make('admin')
             ],
         ]);

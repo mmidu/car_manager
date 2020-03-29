@@ -1,14 +1,12 @@
 import uuid
-from flask import Flask, request, jsonify
-from ledger import Ledger, milli_time
-from contract import validate
-
-app = Flask(__name__)
+from flask import request, jsonify, render_template
+from app.ledger.ledger import Ledger
+from app.ledger.contract import validate_contract
+from app import app
 
 ledger = Ledger(name='transactions')
 
-
-@app.route('/', methods=['GET'])
+@app.route('/api', methods=['GET'])
 def home():
 	return "v1.0", 201
 
@@ -23,7 +21,7 @@ def init_ledger():
 def add_transaction():
 	request_data = request.get_json()
 
-	status, message = validate(request_data)
+	status, message = validate_contract(request_data)
 	if not status:
 		return message, 404
 
@@ -37,3 +35,11 @@ def get_chain():
 		"_size": len(chain_data),
 		"chain": chain_data
 	})
+
+@app.route('/car/<plate>', methods=['GET'])
+def get_last_transaction(plate):
+	res = ledger.transaction_by_plate(plate)
+	if not res:
+		return 'No cars with the selected plate.', 404
+	return jsonify(res['transaction']), 201
+

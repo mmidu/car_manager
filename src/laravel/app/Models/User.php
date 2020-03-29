@@ -12,15 +12,16 @@ class User extends Authenticatable {
     use Notifiable;
 
     protected $fillable = [
-        'email', 'password', 'registry_id'
+        'fiscal_code', 'password', 'first_name', 'last_name', 'birth_date', 'address'
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'email_verified_at', 'created_at', 'updated_at', 'id'
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'email_verified_at' => 'timestamp',
+        'address' => 'timestamp'
     ];
 
     public function registry() {
@@ -29,5 +30,9 @@ class User extends Authenticatable {
 
     public function cars() {
         return $this->hasMany(Car::class);
+    }
+
+    public function getUsernameAttribute(){
+        return $this->fiscal_code;
     }
 }

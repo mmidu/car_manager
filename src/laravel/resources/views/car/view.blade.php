@@ -9,11 +9,9 @@
                     <form method="POST" class="ct_form" action="{{ route('car_transfer') }}">
                         @csrf
                         @include('car.data')
-
-                        @include('user.data', ['type' => 'old_owner'])
-
-                        @include('user.data', ['type' => 'new_owner'])
-
+                        @include('user.data', ['old_owner' => true])
+                        @include('user.data', ['old_owner' => false])
+                        
                         <div class="form-group row mb-0 e">
                             <div class="col-md-6 offset-md-4 b">
                                 <button class="btn btn-primary old_owner" id="transfer">
@@ -29,6 +27,7 @@
                                 </button>
                             </div>
                         </div>
+                        
                     </form>
                 </div>
             </div>

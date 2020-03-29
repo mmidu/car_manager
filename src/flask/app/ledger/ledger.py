@@ -1,8 +1,9 @@
 from hashlib import sha256
 import json
 import time
-from queries import sorted_chain
-from migrations import transactions
+import re
+from app.database.queries import sorted_chain, plate_last_transaction
+from app.database.migrations import transactions
 from elasticsearch import Elasticsearch
 
 es = Elasticsearch('http://cm_elastic')
@@ -22,6 +23,14 @@ class Ledger:
 	def chain(self):
 		data = es.search(index=self.name, body=sorted_chain)['hits']['hits']
 		return list(map(lambda x: x['_source'], data))
+
+	def transaction_by_plate(self, plate):
+		query = re.sub('__plate__', plate, json.dumps(plate_last_transaction))
+		data = es.search(index=self.name, body=query)['hits']['hits']
+		lst = list(map(lambda x: x['_source'], data))
+		if not lst:
+			return None
+		return lst[0]
 		
 	def init(self):
 		self.init_elastic()
