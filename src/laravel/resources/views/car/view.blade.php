@@ -12,21 +12,17 @@
                         @include('user.data', ['old_owner' => true])
                         @include('user.data', ['old_owner' => false])
                         
-                        <div class="form-group row mb-0 e">
-                            <div class="col-md-6 offset-md-4 b">
+                            <div>
                                 <button class="btn btn-primary old_owner" id="transfer">
                                     {{ __('Trasferisci proprietà') }}
                                 </button>
                             </div>
-                        </div>
 
-                        <div class="form-group row mb-0 e">
-                            <div class="col-md-6 offset-md-4 b">
+                            <div">
                                 <button type="submit" class="btn btn-primary hide new_owner">
                                     {{ __('Conferma') }}
                                 </button>
                             </div>
-                        </div>
                         
                     </form>
                 </div>
@@ -38,8 +34,8 @@
 
     $(document).on("click", '#transfer', function(e){
         e.preventDefault()
-        $('.car, .old_owner').hide()
-        $('.new_owner').show()
+        $('.car, .old_owner').addClass('hide')
+        $('.new_owner').removeClass('hide')
     });
 
 </script>

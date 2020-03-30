@@ -75,44 +75,38 @@
             display: grid;
         }
 
-        .form-group{
-            margin:10px;
-            display:grid;
-            grid-template-columns: calc(100%/3) calc(100%/3) calc(100%/3);
-        }
-
-        .form_row{
-            display: grid; 
-            grid-template-columns: 15% 70% 15%;
-            grid-template-areas: 
-            't t t'
-            '. a .'
-            '. b .'
-        }
-
-        .e{
-            grid-area: e;
-            display: grid;
-            grid-template-columns: 20% 20% 20% 20% 20%;
-            grid-template-areas: '. . b . .';
-        }
-
-        .b{
-            grid-area: b;
-        }
 
         #app{
             margin:50px;
+        }
+        .card{
+            padding:5%;
         }
         .upper{
             text-transform: uppercase;
         }
         .hide{
-            display:none;
+            display:none !important;
         }
         .disabled{
             pointer-events: none;
             user-select: none;
+        }
+        .form_group{
+        display:inline-block;
+        width: 60%;
+        }
+        .form_row{
+            display:grid;  
+            grid-template-columns: repeat(3, 33.33%); 
+            padding: 1em;
+
+        }
+        .form_el_title{
+            display: block;
+        }
+        .form_el_input{
+            width:60%;
         }
     </style>
 </head>
