@@ -37,8 +37,15 @@ def get_chain():
 	})
 
 @app.route('/car/<plate>', methods=['GET'])
-def get_last_transaction(plate):
+def transaction_by_plate(plate):
 	res = ledger.transaction_by_plate(plate)
+	if not res:
+		return 'No cars with the selected plate.', 404
+	return jsonify(res['transaction']), 201
+
+@app.route('/car/<plate>/<owner>', methods=['GET'])
+def transaction_by_plate_owner(plate, owner):
+	res = ledger.transaction_by_plate_owner(plate, owner)
 	if not res:
 		return 'No cars with the selected plate.', 404
 	return jsonify(res['transaction']), 201

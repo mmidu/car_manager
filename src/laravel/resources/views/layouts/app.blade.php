@@ -110,6 +110,10 @@
         .hide{
             display:none;
         }
+        .disabled{
+            pointer-events: none;
+            user-select: none;
+        }
     </style>
 </head>
 <body>

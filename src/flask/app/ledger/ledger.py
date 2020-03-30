@@ -2,7 +2,7 @@ from hashlib import sha256
 import json
 import time
 import re
-from app.database.queries import sorted_chain, plate_last_transaction
+from app.database.queries import *
 from app.database.migrations import transactions
 from elasticsearch import Elasticsearch
 
@@ -23,14 +23,6 @@ class Ledger:
 	def chain(self):
 		data = es.search(index=self.name, body=sorted_chain)['hits']['hits']
 		return list(map(lambda x: x['_source'], data))
-
-	def transaction_by_plate(self, plate):
-		query = re.sub('__plate__', plate, json.dumps(plate_last_transaction))
-		data = es.search(index=self.name, body=query)['hits']['hits']
-		lst = list(map(lambda x: x['_source'], data))
-		if not lst:
-			return None
-		return lst[0]
 		
 	def init(self):
 		self.init_elastic()
@@ -116,4 +108,20 @@ class Ledger:
 	# 		block['hash'], previous_hash = block_hash, block_hash
 
 	# 	return result
+	
+	def transaction_by_plate(self, plate):
+		query = re.sub('__plate__', plate, json.dumps(last_by_plate))
+		data = es.search(index=self.name, body=query)['hits']['hits']
+		lst = list(map(lambda x: x['_source'], data))
+		if not lst:
+			return None
+		return lst[0]
 
+	def transaction_by_plate_owner(self, plate, fiscal_code):
+		query = re.sub('__plate__', plate, json.dumps(last_by_plate_owner))
+		query = re.sub('__fiscal_code__', fiscal_code, query)
+		data = es.search(index=self.name, body=query)['hits']['hits']
+		lst = list(map(lambda x: x['_source'], data))
+		if not lst:
+			return None
+		return lst[0]

@@ -25,6 +25,4 @@ Route::get('/car/search', 'LedgerController@home');
 
 Route::post('/car/search', 'LedgerController@searchTransaction')->name('car_search');
 
-Route::post('/car/transfer', function(){
-	return 'ok';
-})->name('car_transfer');
+Route::post('/car/transfer', 'LedgerController@transfer')->name('car_transfer');

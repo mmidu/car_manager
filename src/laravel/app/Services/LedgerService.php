@@ -36,6 +36,25 @@ class LedgerService implements LedgerServiceInterface
         }
     }
 
+    public function getLastTransactionByPlateAndOwner(string $plate, string $owner):object{
+        try{
+            return $this->response(true, $this->client->get($this->domain.'car/'.$plate.'/'.$owner)->getBody());
+        } catch(ClientException $exception){
+            return $this->response(false, $exception->getMessage());
+        }
+    }
+
+    public function postTransaction(array $transaction): object{
+        try{
+            return $this->response(true, $this->client->post($this->domain.'add_transaction', [
+                'headers' => ['Content-Type' => 'application/json'],
+                'body' => json_encode($transaction)
+            ])->getBody());
+        } catch(ClientException $exception){
+            return $this->response(false, $exception->getMessage());
+        }
+    }
+
     private function response($status, $message): object{
         return (object)[
           "status" => $status,

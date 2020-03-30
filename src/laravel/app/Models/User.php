@@ -35,4 +35,8 @@ class User extends Authenticatable {
     public function getUsernameAttribute(){
         return $this->fiscal_code;
     }
+
+    public static function getByFiscalCode(string $fiscal_code):?User{
+        return User::where(['fiscal_code' => $fiscal_code])->first();
+    }
 }
