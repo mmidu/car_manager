@@ -72,7 +72,7 @@ class Ledger:
 		return computed_hash
 
 	def add_to_chain(self, block):
-		es.index(index=self.name, doc_type='_create', id=block['hash'], body=block)
+		es.index(index=self.name, doc_type='_create', id=block['hash'], body=block, refresh=True)
 
 	def is_valid_proof(self, block, block_hash):
 		return (block_hash.startswith('0' * self.difficulty) and
