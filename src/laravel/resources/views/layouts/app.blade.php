@@ -27,7 +27,12 @@
             margin: 0;
             text-align:center;
         }
-
+        input{
+            border-radius: 4px;
+            border-style: none;
+            border: 1px solid grey;
+            padding: 3px 6px;
+        }
         .full-height {
             height: 100vh;
         }
@@ -107,6 +112,9 @@
         }
         .form_el_input{
             width:60%;
+        }
+        .error{
+            border: 2px solid red;
         }
     </style>
 </head>
