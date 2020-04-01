@@ -32,7 +32,7 @@
 							<div class="form_row">
 								<div>
 									<label class="form_el_title" for="fiscal_code">{{ __('Codice fiscale') }}</label>
-									<input class="form_el_input upper" placeholder="Codice fiscale" type="text" name="fiscal_code" id="fiscal_code" required>
+									<input class="form_el_input upper" placeholder="Codice fiscale" type="text" name="fiscal_code" id="fiscal_code" required pattern="^[a-zA-Z]{6}[0-9]{2}[abcdehlmprstABCDEHLMPRST]{1}[0-9]{2}([a-zA-Z]{1}[0-9]{3})[a-zA-Z]{1}$">
 								</div>
 								
 								<div>
@@ -86,7 +86,7 @@ $(document).on('focusout', 'input, select', function(e){
 	 		if(data){
 	 			$('#fiscal_code').removeClass('error')
 	 		} else {
-	 			$('#fiscal_code').addClass('')
+	 			$('#fiscal_code').addClass('error')
 	 		}
 	 		$('#submit').prop('disabled', !data);
 	 	}

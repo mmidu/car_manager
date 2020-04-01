@@ -112,14 +112,19 @@ class LedgerController extends Controller
     }
 
     public function validateFiscalCode(Request $request){
+        $fiscal_code = strtoupper(preg_replace('/\s+/', '', $request->get('fiscal_code')));
+
+        if(!preg_match('/^[a-zA-Z]{6}[0-9]{2}[abcdehlmprstABCDEHLMPRST]{1}[0-9]{2}([a-zA-Z]{1}[0-9]{3})[a-zA-Z]{1}$/', $fiscal_code)){
+            return response()->json(false);
+        }
+
     	$months = ['-1','A','B','C','D','E','H','L','M','P','R','S','T'];
 
     	$first_name = preg_replace('/\s+/', '', $request->get('first_name'));
     	$last_name = preg_replace('/\s+/', '', $request->get('last_name'));
     	$birth_date = explode('-', $request->get('birth_date'));
     	array_push($birth_date,0,0,0);
-    	$gender = $request->get('gender') != "Seleziona" ? intval($request->get('gender')) : 0;
-    	$fiscal_code = strtoupper(preg_replace('/\s+/', '', $request->get('fiscal_code')));
+    	$gender = $request->get('gender') != "Seleziona" ? intval($request->get('gender')) : -1;
 
     	$lname = '';
 
