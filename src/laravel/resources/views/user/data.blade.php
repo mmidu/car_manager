@@ -27,16 +27,5 @@
             <label class="form_el_title" for="address">{{ __('Indirizzo') }}</label>
             <input class="form_el_input" type="text" name="{{ $old_owner ? '_address' : 'address' }}" value="{{ $old_owner ? ($user->address ?? null) : '' }}" required autocomplete="address">
         </div>
-        
-        <div>
-            @if(!$old_owner)
-            <label class="form_el_title" for="gender">{{ __('Genere') }}</label>
-            <select class="form_el_input" name="gender" required>
-                <option>Seleziona</option>
-                <option value="40">F</option>
-                <option value="0">M</option>
-            </select>
-            @endif
-        </div>
     </div>
 </div>

@@ -104,7 +104,11 @@ class LedgerController extends Controller
             'owner' => $new_owner
         ]);
 
-        return $new_transaction->data;
+        if($new_transaction->data == 'ok'){
+            return view('car.search')->withErrors(['error' => 'La proprietà è stata trasferita con successo.']);
+        } else {
+            return view('car.search')->withErrors(['error' => 'C\'è stato un errore con la tua operazione.']);
+        }
     }
 
     public function validateFiscalCode(Request $request){
