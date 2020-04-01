@@ -80,7 +80,7 @@ class Ledger:
 
 	def add_direct(self, transaction):
 		if not self.check_chain_validity():
-			return 'error: damaged chain'
+			return 'error: tampered chain'
 
 		last_block = self.last_block
 
