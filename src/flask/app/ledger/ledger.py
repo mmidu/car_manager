@@ -75,10 +75,13 @@ class Ledger:
 		es.index(index=self.name, doc_type='_create', id=block['hash'], body=block, refresh=True)
 
 	def is_valid_proof(self, block, block_hash):
-		return (block_hash.startswith('0' * self.difficulty) and
-				block_hash == self.compute_hash(block))
+		return block['index'] != 0 and (block_hash.startswith('0' * self.difficulty) and
+				block_hash == self.compute_hash(block)) or block_hash == self.compute_hash(block)
 
 	def add_direct(self, transaction):
+		if not self.check_chain_validity():
+			return 'error: damaged chain'
+
 		last_block = self.last_block
 
 		new_block = {
@@ -92,22 +95,26 @@ class Ledger:
 
 		return self.add_block(new_block, proof) and 'ok' or 'ko'
 
-	# def check_chain_validity(self, chain):
-	# 	result = True
-	# 	previous_hash = "0"
+	def check_chain_validity(self):
+		result = True
+		previous_hash = "0"
 
-	# 	for block in chain:
-	# 		block_hash = block['hash']
-	# 		delattr(block, "hash")
+		reverse_chain = self.chain
+		reverse_chain.reverse()
+		 
+		for block in reverse_chain:
 
-	# 		if not self.is_valid_proof(block, block_hash) or \
-	# 				previous_hash != block['previous_hash']:
-	# 			result = False
-	# 			break
+			block_hash = block['hash']
+			del block["hash"]
 
-	# 		block['hash'], previous_hash = block_hash, block_hash
+			if not self.is_valid_proof(block, block_hash) or \
+					previous_hash != block['previous_hash']:
+				result = False
+				break
 
-	# 	return result
+			block['hash'], previous_hash = block_hash, block_hash
+
+		return result
 	
 	def transaction_by_plate(self, plate):
 		query = re.sub('__plate__', plate, json.dumps(last_by_plate))

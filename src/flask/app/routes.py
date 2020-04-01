@@ -36,6 +36,13 @@ def get_chain():
 		"chain": chain_data
 	})
 
+@app.route('/check_chain', methods=['GET'])
+def check_chain():
+	valid = ledger.check_chain_validity()
+	return jsonify({
+		"valid": valid
+	})
+
 @app.route('/car/<plate>', methods=['GET'])
 def transaction_by_plate(plate):
 	res = ledger.transaction_by_plate(plate)
