@@ -132,11 +132,11 @@
                                     <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                                 </div>
                             @endif
-                            @if (Route::has('register') && Route::getCurrentRoute()->getName() != 'register')
+                            <!-- @if (Route::has('register') && Route::getCurrentRoute()->getName() != 'register')
                                 <div class="nav-item">
                                     <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
                                 </div>
-                            @endif
+                            @endif -->
                         @else
                             <div class="nav-item dropdown">
 

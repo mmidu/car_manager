@@ -30,7 +30,7 @@ class LedgerService implements LedgerServiceInterface
 
     public function getCar(string $plate):object{
         try{
-            return $this->response(true, $this->client->get($this->domain.'car/'.$plate)->getBody());
+            return $this->response(true, $this->client->get($this->domain.'car/'.$plate)->getBody()->getContents());
         } catch(ClientException $exception){
             return $this->response(false, $exception->getMessage());
         }

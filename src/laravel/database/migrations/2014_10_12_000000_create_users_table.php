@@ -17,11 +17,6 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('fiscal_code')->unique();
             $table->string('password');
-            $table->string('first_name')->nullable();
-            $table->string('last_name')->nullable();
-            $table->timestamp('birth_date')->nullable();
-            $table->string('address')->nullable();
-            $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
         });

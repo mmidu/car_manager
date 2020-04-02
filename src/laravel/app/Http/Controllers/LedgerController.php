@@ -14,7 +14,7 @@ class LedgerController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['validateFiscalCode']]);
+        $this->middleware('auth');
         $this->ls = new LedgerService();
     }
 
@@ -29,10 +29,7 @@ class LedgerController extends Controller
         $transaction = $this->ls->getCar($license_plate);
 
         if(!$transaction->status){
-            $car = new \stdClass();
-            $car->license_plate = $license_plate;
-            $car->empty = true;
-            return view('car.view', compact('car'));
+            return view('car.search')->withErrors(['error' => 'Non sono presenti automobili di tua proprietà con la targa inserita.']);
         }
 
         $data = json_decode($transaction->data);
@@ -109,55 +106,5 @@ class LedgerController extends Controller
         } else {
             return view('car.search')->withErrors(['error' => 'C\'è stato un errore con la tua operazione.']);
         }
-    }
-
-    public function validateFiscalCode(Request $request){
-        $fiscal_code = strtoupper(preg_replace('/\s+/', '', $request->get('fiscal_code')));
-
-        if(!preg_match('/^[a-zA-Z]{6}[0-9]{2}[abcdehlmprstABCDEHLMPRST]{1}[0-9]{2}([a-zA-Z]{1}[0-9]{3})[a-zA-Z]{1}$/', $fiscal_code)){
-            return response()->json(false);
-        }
-
-    	$months = ['-1','A','B','C','D','E','H','L','M','P','R','S','T'];
-
-    	$first_name = preg_replace('/\s+/', '', $request->get('first_name'));
-    	$last_name = preg_replace('/\s+/', '', $request->get('last_name'));
-    	$birth_date = explode('-', $request->get('birth_date'));
-    	array_push($birth_date,0,0,0);
-    	$gender = $request->get('gender') != "Seleziona" ? intval($request->get('gender')) : -1;
-
-    	$lname = '';
-
-    	if(strlen($last_name) < 3){
-    		$lname = $last_name;
-    		while(strlen($lname) < 3){
-    			$lname .= 'x';
-    		}
-    	} else {
-    		$consonants = preg_replace('/[aeiou]/i', '', $last_name);
-    		$vowels = preg_replace('/[^aeiou]/i', '', $last_name);
-    		$lname = strlen($consonants) <= 3 ? substr($consonants.$vowels, 0, 3) : substr($consonants, 0, 3);
-    	}
-
-    	$fname = '';
-
-    	if(strlen($first_name) < 3){
-    		$fname = $first_name;
-    		while(strlen($fname) < 3){
-    			$fname += 'x';
-    		}
-    	} else {
-    		$consonants = preg_replace('/[aeiou]/i', '', $first_name);
-    		$vowels = preg_replace('/[^aeiou]/i', '', $first_name);
-    		$fname = strlen($consonants) <= 3 ? substr($consonants.$vowels, 0, 3) : $consonants[0].$consonants[2].$consonants[3];
-    	}
-
-    	$day = substr('0'.(intval($birth_date[2])+intval($gender)),-2);
-    	$month = $months[intval($birth_date[1])];
-    	$year = substr($birth_date[0],-2);
-
-    	$_fiscal_code = strtoupper("$lname$fname$year$month$day");
-
-    	return response()->json($_fiscal_code == substr($fiscal_code,0,11));
     }
 }

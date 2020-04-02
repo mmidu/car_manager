@@ -17,7 +17,9 @@ Route::get('/', function () {
     return redirect()->guest(route('login'));
 });
 
-Auth::routes();
+Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
+Route::post('login', 'Auth\LoginController@login');
+Route::post('logout', 'Auth\LoginController@logout')->name('logout');
 
 Route::get('/home', 'UserController@home');
 
@@ -26,5 +28,3 @@ Route::get('/car/search', 'LedgerController@home');
 Route::post('/car/search', 'LedgerController@searchTransaction')->name('car_search');
 
 Route::post('/car/transfer', 'LedgerController@transfer')->name('car_transfer');
-
-Route::post('/car/transfer/validate', 'LedgerController@validateFiscalCode')->name('transfer_validate');
