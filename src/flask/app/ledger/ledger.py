@@ -1,12 +1,9 @@
 from hashlib import sha256
 import json
 import time
-import re
-from app.database.queries import *
-from app.database.migrations import transactions
-from elasticsearch import Elasticsearch
+import redis
 
-es = Elasticsearch('http://cm_elastic')
+r = redis.Redis(host='cm_redis', port=6379, db=0)
 
 milli_time = lambda: int(round(time.time() * 1000))
 
@@ -17,21 +14,16 @@ class Ledger:
 
 	@property
 	def last_block(self):
-		return self.chain[0]
+		return self.chain[-1]
 
 	@property
 	def chain(self):
-		data = es.search(index=self.name, body=sorted_chain)['hits']['hits']
-		return list(map(lambda x: x['_source'], data))
+		data = r.zrange(self.name, 0, -1)
+		return [json.loads(elem.decode()) for elem in data]
 		
 	def init(self):
-		self.init_elastic()
+		r.flushdb()
 		self.create_genesis_block()
-
-	def init_elastic(self):
-		es.indices.delete(index=self.name, ignore=[400, 404])
-		es.indices.create(index=self.name)
-		es.indices.put_mapping(index=self.name, body=transactions)
 
 	def create_genesis_block(self):
 		if not self.chain:
@@ -72,7 +64,7 @@ class Ledger:
 		return computed_hash
 
 	def add_to_chain(self, block):
-		es.index(index=self.name, doc_type='_create', id=block['hash'], body=block, refresh=True)
+		r.zadd(self.name, {json.dumps(block): block["index"]})
 
 	def is_valid_proof(self, block, block_hash):
 		return block['index'] != 0 and (block_hash.startswith('0' * self.difficulty) and
@@ -98,11 +90,8 @@ class Ledger:
 	def check_chain_validity(self):
 		result = True
 		previous_hash = "0"
-
-		reverse_chain = self.chain
-		reverse_chain.reverse()
 		 
-		for block in reverse_chain:
+		for block in self.chain:
 
 			block_hash = block['hash']
 			del block["hash"]
@@ -116,19 +105,19 @@ class Ledger:
 
 		return result
 	
-	def transaction_by_plate(self, plate):
-		query = re.sub('__plate__', plate, json.dumps(last_by_plate))
-		data = es.search(index=self.name, body=query)['hits']['hits']
-		lst = list(map(lambda x: x['_source'], data))
-		if not lst:
-			return None
-		return lst[0]
+	# def transaction_by_plate(self, plate):
+	# 	query = re.sub('__plate__', plate, json.dumps(last_by_plate))
+	# 	data = es.search(index=self.name, body=query)['hits']['hits']
+	# 	lst = list(map(lambda x: x['_source'], data))
+	# 	if not lst:
+	# 		return None
+	# 	return lst[0]
 
-	def transaction_by_plate_owner(self, plate, fiscal_code):
-		query = re.sub('__plate__', plate, json.dumps(last_by_plate_owner))
-		query = re.sub('__fiscal_code__', fiscal_code, query)
-		data = es.search(index=self.name, body=query)['hits']['hits']
-		lst = list(map(lambda x: x['_source'], data))
-		if not lst:
-			return None
-		return lst[0]
+	# def transaction_by_plate_owner(self, plate, fiscal_code):
+	# 	query = re.sub('__plate__', plate, json.dumps(last_by_plate_owner))
+	# 	query = re.sub('__fiscal_code__', fiscal_code, query)
+	# 	data = es.search(index=self.name, body=query)['hits']['hits']
+	# 	lst = list(map(lambda x: x['_source'], data))
+	# 	if not lst:
+	# 		return None
+	# 	return lst[0]

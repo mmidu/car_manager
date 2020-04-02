@@ -45,14 +45,14 @@ def check_chain():
 
 @app.route('/car/<plate>', methods=['GET'])
 def transaction_by_plate(plate):
-	res = ledger.transaction_by_plate(plate)
-	if not res:
-		return 'No cars with the selected plate.', 404
-	return jsonify(res['transaction']), 201
 
-@app.route('/car/<plate>/<owner>', methods=['GET'])
-def transaction_by_plate_owner(plate, owner):
-	res = ledger.transaction_by_plate_owner(plate, owner)
+	elem = next((elem for elem in reversed(ledger.chain) if elem["transaction"] and elem["transaction"]["car"]["license_plate"] == plate), -1)
+
+	if elem == -1:
+		return 'No cars with the selected plate.', 404
+	return jsonify(elem), 201
+
+	res = ledger.transaction_by_plate(plate)
 	if not res:
 		return 'No cars with the selected plate.', 404
 	return jsonify(res['transaction']), 201
