@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Registry;
-use App\Models\Car;
+use App\Services\LedgerService;
 
 class User extends Authenticatable {
     use Notifiable;
@@ -36,7 +35,11 @@ class User extends Authenticatable {
         return $this->fiscal_code;
     }
 
-    public static function getByFiscalCode(string $fiscal_code):?User{
-        return User::where(['fiscal_code' => $fiscal_code])->first();
+    public static function getLatestByFiscalCode(string $fiscal_code):?object{
+        $lt = new LedgerService();
+
+        $user = $lt->getLatestUserData($fiscal_code);
+
+        return $user->status ? json_decode($user->data) : NULL;
     }
 }

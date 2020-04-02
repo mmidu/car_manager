@@ -51,3 +51,12 @@ def transaction_by_plate(plate):
 	if elem == -1:
 		return 'No cars with the selected plate.', 404
 	return elem, 201
+
+@app.route('/user/<fcode>', methods=['GET'])
+def user_by_fiscal_code(fcode):
+
+	elem = next((elem["transaction"]["owner"] for elem in reversed(ledger.chain) if elem["transaction"] and elem["transaction"]["owner"]["fiscal_code"] == fcode), -1)
+
+	if elem == -1:
+		return 'No users with the selected fiscal code.', 404
+	return elem, 201

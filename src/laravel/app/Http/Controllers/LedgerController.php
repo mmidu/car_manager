@@ -55,7 +55,7 @@ class LedgerController extends Controller
     		return view('car.search')->withErrors(['error' => 'Il codice fiscale inserito è errato']);
     	}
 
-        if(empty(User::getByFiscalCode($request->get('fiscal_code')))){
+        if(empty(User::getLatestByFiscalCode($request->get('fiscal_code')))){
             return view('car.search')->withErrors(['error' => 'Il nuovo proprietario non esiste']);
         }
 

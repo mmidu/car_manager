@@ -36,6 +36,14 @@ class LedgerService implements LedgerServiceInterface
         }
     }
 
+    public function getLatestUserData(string $fcode):object{
+        try{
+            return $this->response(true, $this->client->get($this->domain.'user/'.$fcode)->getBody()->getContents());
+        } catch(ClientException $exception){
+            return $this->response(false, $exception->getMessage());
+        }
+    }
+
     public function postTransaction(array $transaction): object{
         try{
             return $this->response(true, $this->client->post($this->domain.'add_transaction', [

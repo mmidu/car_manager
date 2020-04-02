@@ -1,4 +1,4 @@
-<div class="car {{ $car->empty ?: 'disabled' }} form_group">
+<div class="car disabled form_group">
     <div>AUTO</div>
     <div class="form_row">
         <div>
@@ -25,12 +25,12 @@
         
         <div>
             <label class="form_el_title" for="engine_displacement">{{ __('Cilindrata') }}</label>
-            <input class="form_el_input" id="engine_displacement" type="number" name="engine_displacement" value="{{ $car->engine_displacement ?? null }}" required autocomplete="engine_displacement">
+            <input class="form_el_input" id="engine_displacement" type="text" name="engine_displacement" value="{{ $car->engine_displacement ?? null }}" required autocomplete="engine_displacement">
         </div>
         
         <div>
             <label class="form_el_title" for="horse_power">{{ __('Cavalli') }}</label>
-            <input class="form_el_input" id="horse_power" type="number" name="horse_power" value="{{ $car->horse_power ?? null }}" required autocomplete="horse_power">
+            <input class="form_el_input" id="horse_power" type="text" name="horse_power" value="{{ $car->horse_power ?? null }}" required autocomplete="horse_power">
         </div>
     </div>
 </div>
